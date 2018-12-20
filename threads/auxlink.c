@@ -44,11 +44,32 @@ static THD_FUNCTION(auxLinkThread, arg)
 
         if (count > 0)
         {
+            tk_message_t *msg = (tk_message_t *)rxBuf;
+
             count = 0;
             messagingMessage_t m = {0};
-            m.messagingEvent = MESSAGING_EVENT_SEND;
+
+            if ((msg->destination & REPLY) == REPLY)
+            {
+                m.messagingEvent = MESSAGING_EVENT_REPLY;
+            }
+            else
+            {
+                m.messagingEvent = MESSAGING_EVENT_SEND;
+            }
+
             m.source.channel = MESSAGING_AUXLINK;
-            memcpy(&m.message, rxBuf, sizeof(tk_message_t));
+
+            if ((msg->destination & (REPLY | DEST_GPS)) == (REPLY | DEST_GPS))
+            {
+                m.payloadType = PAYLOAD_GPS;
+                memcpy(&m.payload, rxBuf, sizeof(tk_gpsmessage_t));
+            }
+            else
+            {
+                m.payloadType = PAYLOAD_EVENT;
+                memcpy(&m.payload, rxBuf, sizeof(tk_message_t));
+            }
 
             if (sendMessage(&m) != MSG_OK)
                 DEBUG("error\n\r");

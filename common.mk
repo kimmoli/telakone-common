@@ -4,5 +4,6 @@ COMMONSRC = $(COMMON)/shell/cmd_ping.c \
             $(COMMON)/threads/auxlink.c \
             $(COMMON)/threads/messaging.c
 
-COMMONINC = $(COMMON)/shell \
+COMMONINC = $(COMMON)/inc \
+            $(COMMON)/shell \
             $(COMMON)/threads

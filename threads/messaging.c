@@ -6,6 +6,8 @@
 #include "chprintf.h"
 #include "helpers.h"
 #include "pwm.h"
+#include "time.h"
+#include "auxmotor.h"
 
 #define MESSAGEBUFFERSIZE 10
 
@@ -23,7 +25,6 @@ static THD_FUNCTION(messagingThread, arg)
 
     replyMessage.header = TK_MESSAGE_HEADER;
     replyMessage.fromNode = myAuxlinkAddress;
-    replyMessage.destination = DEST_ACK;
 
     msg_t res;
     msg_t mmst;
@@ -37,32 +38,56 @@ static THD_FUNCTION(messagingThread, arg)
         {
             messagingMessage_t *mmp = (messagingMessage_t *)mmst;
 
-            if (mmp->messagingEvent & MESSAGING_EVENT_SEND)
+            if ((mmp->messagingEvent & MESSAGING_EVENT_SEND) && (mmp->payloadType == PAYLOAD_EVENT))
             {
-                if (mmp->message.header == TK_MESSAGE_HEADER && mmp->message.toNode == myAuxlinkAddress)
+                tk_message_t *msg = (tk_message_t *) mmp->payload;
+
+                if (msg->header == TK_MESSAGE_HEADER && msg->toNode == myAuxlinkAddress)
                 {
-                    switch (mmp->message.destination)
+                    switch (msg->destination)
                     {
-                        case DEST_ACK:
-                            PRINT("OK\n\r");
-                            break;
-
                         case DEST_PING:
-                            PRINT("Got ping from %02x, replying...\n\r", mmp->message.fromNode);
+                            PRINT("Got ping from %02x, replying...\n\r", msg->fromNode);
 
-                            replyMessage.toNode = mmp->message.fromNode;
-                            replyMessage.sequence = mmp->message.sequence;
+                            replyMessage.toNode = msg->fromNode;
+                            replyMessage.sequence = msg->sequence;
                             replyMessage.event = 0;
+                            replyMessage.destination = REPLY | DEST_PING;
                             auxLinkTransmit(sizeof(tk_message_t), (uint8_t *) &replyMessage);
                             break;
 
                         case DEST_PWM:
-                            pwmSetChannel((mmp->message.event & 0xff00) >> 8, 100, mmp->message.event & 0xff);
+                            pwmSetChannel((msg->event & 0xff00) >> 8, 100, msg->event & 0xff);
+                            break;
+#ifdef BOARD_AUXGPS
+                        case DEST_GPS:
+                            chEvtBroadcastFlags(&gpsEvent, GPSEVENT_GET | (msg->fromNode << 16));
+                            break;
+#endif
 
-                            replyMessage.toNode = mmp->message.fromNode;
-                            replyMessage.sequence = mmp->message.sequence;
-                            replyMessage.event = 0;
-                            auxLinkTransmit(sizeof(tk_message_t), (uint8_t *) &replyMessage);
+#ifdef BOARD_AUXIO
+                        case DEST_AUXMOTOR:
+                            chEvtBroadcastFlags(&motorconf[(msg->event & 0xF0000) >> 16].event, msg->event & 0xFFFF);
+                            break;
+#endif
+
+                        default:
+                            PRINT("Unknown message received from %02x, destination %04x\n\r", msg->fromNode,
+                                                                                              msg->destination);
+                            break;
+                    }
+                }
+            }
+            else if ((mmp->messagingEvent & MESSAGING_EVENT_REPLY) && (mmp->payloadType == PAYLOAD_EVENT))
+            {
+                tk_message_t *msg = (tk_message_t *) mmp->payload;
+
+                if (msg->header == TK_MESSAGE_HEADER && msg->toNode == myAuxlinkAddress)
+                {
+                    switch (msg->destination)
+                    {
+                        case REPLY | DEST_PING:
+                            PRINT("Ping replied ok\n\r");
                             break;
 
                         default:
@@ -70,6 +95,40 @@ static THD_FUNCTION(messagingThread, arg)
                     }
                 }
             }
+            else if ((mmp->messagingEvent & MESSAGING_EVENT_REPLY) && (mmp->payloadType == PAYLOAD_GPS))
+            {
+                tk_gpsmessage_t *msg = (tk_gpsmessage_t *) mmp->payload;
+
+                if (msg->header == TK_MESSAGE_HEADER && msg->toNode == myAuxlinkAddress)
+                {
+                    switch (msg->destination)
+                    {
+                        case REPLY | DEST_GPS:
+                            PRINT("Got GPS reply\n\r");
+
+                            gps_output_params_t *gps = (gps_output_params_t *)&msg->data;
+
+                            struct tm *timp;
+                            time_t utc_sec;
+
+                            utc_sec = gps->UTC_sec;
+                            timp = localtime(&utc_sec);
+
+                            PRINT("GPS Fix=%d, Lat=%.6f Lon=%.6f Speed=%.1f Time=%s\r",
+                                gps->fix_status,
+                                gps->latitude,
+                                gps->longitude,
+                                gps->speed,
+                                asctime(timp));
+
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+
             chGuardedPoolFree(&messagingMBoxPool, (void*) mmst);
         }
     }
