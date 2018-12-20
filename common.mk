@@ -1,10 +1,8 @@
-COMMONSRC = \
-       shell/cmd_ping.c \
-       shell/cmd_send.c \
-       threads/threadkiller.c \
-       threads/auxlink.c \
-       threads/messaging.c
+COMMONSRC = $(COMMON)/shell/cmd_ping.c \
+            $(COMMON)/shell/cmd_send.c \
+            $(COMMON)/threads/threadkiller.c \
+            $(COMMON)/threads/auxlink.c \
+            $(COMMON)/threads/messaging.c
 
-COMMONINC = \
-       shell \
-       threads \
+COMMONINC = $(COMMON)/shell \
+            $(COMMON)/threads
