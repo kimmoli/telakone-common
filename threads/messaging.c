@@ -113,6 +113,7 @@ static THD_FUNCTION(messagingThread, arg)
 
                             utc_sec = gps->UTC_sec;
                             timp = localtime(&utc_sec);
+                            timp->tm_hour += gps->tz;
 
                             PRINT("GPS Fix=%d, Lat=%.6f Lon=%.6f Speed=%.1f Time=%s\r",
                                 gps->fix_status,

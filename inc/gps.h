@@ -28,9 +28,7 @@ typedef struct //gps_output_params_t
     uint8_t    pos_mode;       // Positioning mode (0: No fix, 1: Autonomous GNSS fix, 2: Differential GNSS fix)
     uint8_t    antenna_status; // Antenna status (0: Undefined, 1: OK, 2: Open, 3: Short) (Note, this is only available with A3569 board, Quectel L26 receiver)
     uint8_t    num_sats_used;  // Number of satellites being used (0 - 12)
-
-    // CRC-32
-    uint32_t   crc;
+    int32_t    tz;             // timezone
 
 } gps_output_params_t;// __attribute__((packed));
 
