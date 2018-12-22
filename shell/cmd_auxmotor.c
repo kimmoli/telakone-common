@@ -1,4 +1,3 @@
-#ifdef MOTORS
 #include <stdlib.h>
 #include "hal.h"
 #include "chprintf.h"
@@ -36,5 +35,3 @@ void cmd_auxmotor(BaseSequentialStream *chp, int argc, char *argv[])
     chprintf(chp, "motor 1 L1 %s H1 %d %%\n\r", palReadLine(motorconf[1].motorl1) == PAL_HIGH ? "high" : "low", pwmGetChannel(motorconf[1].motorh1_pwm, 100));
     chprintf(chp, "motor 1 L2 %s H2 %d %%\n\r", palReadLine(motorconf[1].motorl2) == PAL_HIGH ? "high" : "low", pwmGetChannel(motorconf[1].motorh2_pwm, 100));
 }
-
-#endif // MOTORS
