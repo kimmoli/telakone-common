@@ -15,6 +15,12 @@ void cmd_auxmotor(BaseSequentialStream *chp, int argc, char *argv[])
         motor = strtol(argv[0], NULL, 0);
         newValue = strtol(argv[1], NULL, 0);
 
+        if (motor >= MOTORS)
+        {
+            chprintf(chp, "Motor %d not available. This board has %d motors\n\r", motor, MOTORS);
+            return;
+        }
+
         if (newValue == 0)
         {
             chprintf(chp, "Aux motor %d stop\n\r", motor);
@@ -29,9 +35,18 @@ void cmd_auxmotor(BaseSequentialStream *chp, int argc, char *argv[])
         }
     }
 
-    chprintf(chp, "am motor(0,1) speed(in -100..0..100 out)\n\r");
-    chprintf(chp, "motor 0 L1 %s H1 %d %%\n\r", palReadLine(motorconf[0].motorl1) == PAL_HIGH ? "high" : "low", pwmGetChannel(motorconf[0].motorh1_pwm, 100));
-    chprintf(chp, "motor 0 L2 %s H2 %d %%\n\r", palReadLine(motorconf[0].motorl2) == PAL_HIGH ? "high" : "low", pwmGetChannel(motorconf[0].motorh2_pwm, 100));
-    chprintf(chp, "motor 1 L1 %s H1 %d %%\n\r", palReadLine(motorconf[1].motorl1) == PAL_HIGH ? "high" : "low", pwmGetChannel(motorconf[1].motorh1_pwm, 100));
-    chprintf(chp, "motor 1 L2 %s H2 %d %%\n\r", palReadLine(motorconf[1].motorl2) == PAL_HIGH ? "high" : "low", pwmGetChannel(motorconf[1].motorh2_pwm, 100));
+    chprintf(chp, "am motor speed\n\r");
+    chprintf(chp, "motor = 0..%d\n\r", MOTORS-1);
+    chprintf(chp, "speed = -100, 0, 100\n\r");
+    chprintf(chp, "\n\r");
+
+    for (int m=0 ; m < MOTORS ; m++)
+    {
+        chprintf(chp, "motor %d L1 %s H1 %d %% L2 %s H2 %d %%\n\r",
+                 m,
+                 palReadLine(motorconf[m].motorl1) == PAL_HIGH ? "high" : "low",
+                 pwmGetChannel(motorconf[m].motorh1_pwm, 100),
+                 palReadLine(motorconf[m].motorl2) == PAL_HIGH ? "high" : "low",
+                 pwmGetChannel(motorconf[m].motorh2_pwm, 100));
+    }
 }
