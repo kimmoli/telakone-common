@@ -4,6 +4,22 @@
 #define AUXMOTOR_EVENT_STOP    0x4000
 #define AUXMOTOR_EVENT_SET     0x8000
 
+#if !defined(LINE_MOTOR1_L1)
+#define LINE_MOTOR1_L1 LINE_MOTORL1
+#endif
+
+#if !defined(LINE_MOTOR1_L2)
+#define LINE_MOTOR1_L2 LINE_MOTORL2
+#endif
+
+#if !defined(TK_PWM_MOTOR1H1)
+#define TK_PWM_MOTOR1H1 TK_PWM_MOTORH1
+#endif
+
+#if !defined(TK_PWM_MOTOR1H2)
+#define TK_PWM_MOTOR1H2 TK_PWM_MOTORH2
+#endif
+
 typedef struct
 {
     int motor;

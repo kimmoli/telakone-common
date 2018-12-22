@@ -43,6 +43,12 @@ static THD_FUNCTION(auxmotorThread, arg)
 
 void startAuxmotorThread(int motor)
 {
+    if (motor >= MOTORS)
+    {
+        PRINT("Not supported motor\n\r");
+        return;
+    }
+
     motorconf[motor].motor = motor;
 
     if (motor == 0)
@@ -54,10 +60,12 @@ void startAuxmotorThread(int motor)
     }
     else
     {
+#if (MOTORS == 2)
         motorconf[motor].motorl1 = LINE_MOTOR2_L1;
         motorconf[motor].motorl2 = LINE_MOTOR2_L2;
         motorconf[motor].motorh1_pwm = TK_PWM_MOTOR2H1;
         motorconf[motor].motorh2_pwm = TK_PWM_MOTOR2H2;
+#endif
     }
 
     motorconf[motor].newValue = 0;
