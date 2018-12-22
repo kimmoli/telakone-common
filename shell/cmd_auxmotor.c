@@ -2,8 +2,8 @@
 #include "hal.h"
 #include "chprintf.h"
 #include "shellcommands.h"
-#include "auxmotor.h"
 #include "pwm.h"
+#include "auxmotor.h"
 
 void cmd_auxmotor(BaseSequentialStream *chp, int argc, char *argv[])
 {
