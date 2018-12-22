@@ -7,7 +7,7 @@ COMMONSRC = $(COMMON)/helpers.c \
             $(COMMON)/threads/auxlink.c \
             $(COMMON)/threads/messaging.c
 
-AUXMOTORSRc = $(COMMON)/shell/cmd_auxmotor.c \
+AUXMOTORSRC = $(COMMON)/shell/cmd_auxmotor.c \
               $(COMMON)/threads/auxmotor.c
 
 COMMONINC = $(COMMON)/inc
