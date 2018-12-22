@@ -1,4 +1,4 @@
-#ifdef (MOTORS)
+#ifdef MOTORS
 #include <stdlib.h>
 #include "hal.h"
 #include "chprintf.h"
