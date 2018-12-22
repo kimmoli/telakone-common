@@ -1,3 +1,4 @@
+#ifdef (MOTORS)
 #include <stdlib.h>
 #include "hal.h"
 #include "auxmotor.h"
@@ -135,3 +136,5 @@ void auxmotorControl(MotorConfig *mc, int value)
 
     chVTSet(&linearaccel_vt, MS2ST(linearacceldelay), linearaccelcb, mc);
 }
+
+#endif // MOTORS
