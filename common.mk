@@ -3,6 +3,7 @@ COMMONSRC = $(COMMON)/helpers.c \
             $(COMMON)/shell/cmd_dm.c \
             $(COMMON)/shell/cmd_diic.c \
             $(COMMON)/shell/cmd_piic.c \
+            $(COMMON)/shell/cmd_probe.c \
             $(COMMON)/threads/threadkiller.c
 
 MESSAGINGSRC = $(COMMON)/shell/cmd_send.c \
